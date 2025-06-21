@@ -45,18 +45,19 @@ console.log("NODE_ENV:", process.env.NODE_ENV);
 // Single, comprehensive CORS middleware that works with all browsers including Brave
 app.use(cors({
     origin: function(origin, callback) {
-        console.log("CORS: Request from origin:", origin);
-        console.log("CORS: Allowed origins:", allowedOrigins);
+        // Only log when there's an actual origin (reduces noise)
+        if (origin) {
+            console.log("CORS: Request from origin:", origin);
+        }
         
         // Allow requests with no origin (same-origin requests, mobile apps, curl requests, etc.)
         if (!origin) {
-            console.log("CORS: No origin provided, allowing request");
             return callback(null, true);
         }
         
         // Check if origin is in allowed list
         if (allowedOrigins.includes(origin)) {
-            console.log("CORS: Origin allowed, returning exact origin:", origin);
+            console.log("CORS: Origin allowed:", origin);
             return callback(null, true); // Let cors middleware handle the origin properly
         }
         
@@ -108,31 +109,26 @@ app.use((req, res, next) => {
     next();
 });
 
-// Debug middleware to log requests and CORS headers
-app.use((req, res, next) => {
-    console.log(`${req.method} ${req.path} from origin: ${req.headers.origin || 'no-origin'}`);
-    
-    // Log request headers for debugging
-    if (req.method === 'OPTIONS') {
-        console.log('Preflight request headers:', {
-            'access-control-request-method': req.headers['access-control-request-method'],
-            'access-control-request-headers': req.headers['access-control-request-headers'],
-            'origin': req.headers.origin,
-            'user-agent': req.headers['user-agent']?.includes('Chrome') ? 'Chrome-based' : 'Other'
-        });
-    }
-    
-    // Capture the response on the way out
-    res.on('finish', () => {
-        console.log(`Response ${res.statusCode} CORS headers:`, {
-            'access-control-allow-origin': res.getHeader('Access-Control-Allow-Origin'),
-            'access-control-allow-credentials': res.getHeader('Access-Control-Allow-Credentials'),
-            'access-control-allow-methods': res.getHeader('Access-Control-Allow-Methods')
-        });
+// Debug middleware to log requests and CORS headers (only in development)
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        // Only log API requests and important routes
+        if (req.path.startsWith('/api/') || req.path.startsWith('/uploads/')) {
+            console.log(`${req.method} ${req.path} from origin: ${req.headers.origin || 'no-origin'}`);
+        }
+        
+        // Log request headers for debugging preflight requests only
+        if (req.method === 'OPTIONS' && req.headers.origin) {
+            console.log('Preflight request headers:', {
+                'access-control-request-method': req.headers['access-control-request-method'],
+                'access-control-request-headers': req.headers['access-control-request-headers'],
+                'origin': req.headers.origin
+            });
+        }
+        
+        next();
     });
-    
-    next();
-});
+}
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

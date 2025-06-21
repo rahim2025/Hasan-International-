@@ -16,15 +16,18 @@ import { useAuthStore } from "./store/useAuthStore"
 import { useEffect } from "react"
 import { Loader } from "lucide-react"
 import toast, { Toaster } from 'react-hot-toast';
-import { HelmetProvider } from 'react-helmet-async';
-import { BrowserRouter } from "react-router-dom";
 import usePageTracking from './hooks/usePageTracking';
 
-const AppContent = () =>{
+const App = () =>{
   const {authUser,checkAuth,isCheckingAuth} = useAuthStore();
+  
   useEffect(()=>{
     checkAuth();
   },[checkAuth])
+  
+  // Add page tracking hook
+  usePageTracking();
+  
   if(isCheckingAuth && !authUser){
     return(
       <div className="flex items-center justify-center h-screen w-full"> 
@@ -32,9 +35,6 @@ const AppContent = () =>{
     </div>
     )
   }
-  
-  // Add page tracking hook
-  usePageTracking();
   
   return(
     <div>
@@ -61,21 +61,9 @@ const AppContent = () =>{
       </Routes>
       
       <Footer />
-      
-
+      <Toaster />
     </div>
   )
-}
-
-function App() {
-  return (
-    <HelmetProvider>
-      <BrowserRouter>
-        <AppContent />
-        <Toaster />
-      </BrowserRouter>
-    </HelmetProvider>
-  );
 }
 
 export default App;

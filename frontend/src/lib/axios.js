@@ -15,7 +15,7 @@ const getApiUrl = () => {
     }
     
     // For local development
-    return 'http://localhost:5000/api';
+    return 'http://localhost:8080/api';
 };
 
 // Create axios instance with default config optimized for all browsers including Brave

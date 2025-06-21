@@ -1,64 +1,93 @@
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 
 const SEO = ({ 
   title = "Hasan International - Your Trusted Source for Genuine Chemical Solutions Since 1958",
   description = "Hasan International is Bangladesh's most trusted chemical supply and distribution company since 1958. Over 65 years of experience providing authentic, high-grade chemical products for pharmaceuticals, textiles, agriculture, and manufacturing.",
-  keywords = "chemical supply bangladesh, chemical distribution, industrial chemicals, laboratory chemicals, textile chemicals, hasan international, bangladesh chemical company, chemical products, pharmaceutical chemicals",  image = "https://www.hasanchemicalbd.com/logo-og.jpg",
+  keywords = "chemical supply bangladesh, chemical distribution, industrial chemicals, laboratory chemicals, textile chemicals, hasan international, bangladesh chemical company, chemical products, pharmaceutical chemicals",  
+  image = "https://www.hasanchemicalbd.com/logo-og.jpg",
   url = "https://www.hasanchemicalbd.com/",
   type = "website",
   schemaData = null
 }) => {
   const fullTitle = title.includes('Hasan International') ? title : `${title} | Hasan International`;
   
-  return (
-    <Helmet>      {/* Primary Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="title" content={fullTitle} />
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
-      <meta name="author" content="Hasan International" />
-      <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-      <meta name="language" content="en" />
-      <meta name="geo.region" content="BD-13" />
-      <meta name="geo.placename" content="Dhaka, Bangladesh" />
-      <meta name="geo.position" content="23.8103;90.4125" />
-      <meta name="ICBM" content="23.8103, 90.4125" />
-      <meta name="distribution" content="global" />
-      <meta name="rating" content="general" />
-      <meta name="revisit-after" content="3 days" />
-      <meta name="theme-color" content="#0d47a1" />
+  useEffect(() => {
+    // Update document title
+    document.title = fullTitle;
+    
+    // Function to update or create meta tag
+    const updateMetaTag = (property, content, isProperty = false) => {
+      const attribute = isProperty ? 'property' : 'name';
+      let meta = document.querySelector(`meta[${attribute}="${property}"]`);
       
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:url" content={url} />
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:image" content={image} />
-      <meta property="og:image:secure_url" content={image} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />      <meta property="og:image:alt" content="Hasan International Logo" />
-      <meta property="og:site_name" content="Hasan International" />
-      <meta property="og:locale" content="en_US" />
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute(attribute, property);
+        document.head.appendChild(meta);
+      }
       
-      {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={url} />
-      <meta property="twitter:title" content={fullTitle} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={image} />
-      <meta property="twitter:image:alt" content="Hasan International Logo" />
-      
-      {/* Canonical URL */}
-      <link rel="canonical" href={url} />
-      
-      {/* Additional Schema Data */}
-      {schemaData && (
-        <script type="application/ld+json">
-          {JSON.stringify(schemaData)}
-        </script>
-      )}
-    </Helmet>
-  );
+      meta.setAttribute('content', content);
+    };
+    
+    // Update primary meta tags
+    updateMetaTag('description', description);
+    updateMetaTag('keywords', keywords);
+    updateMetaTag('author', 'Hasan International');
+    updateMetaTag('robots', 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
+    updateMetaTag('language', 'en');
+    updateMetaTag('geo.region', 'BD-13');
+    updateMetaTag('geo.placename', 'Dhaka, Bangladesh');
+    updateMetaTag('geo.position', '23.8103;90.4125');
+    updateMetaTag('ICBM', '23.8103, 90.4125');
+    updateMetaTag('distribution', 'global');
+    updateMetaTag('rating', 'general');
+    updateMetaTag('revisit-after', '3 days');
+    updateMetaTag('theme-color', '#0d47a1');
+    
+    // Update Open Graph meta tags
+    updateMetaTag('og:type', type, true);
+    updateMetaTag('og:url', url, true);
+    updateMetaTag('og:title', fullTitle, true);
+    updateMetaTag('og:description', description, true);
+    updateMetaTag('og:image', image, true);
+    updateMetaTag('og:image:secure_url', image, true);
+    updateMetaTag('og:image:width', '1200', true);
+    updateMetaTag('og:image:height', '630', true);
+    updateMetaTag('og:image:alt', 'Hasan International Logo', true);
+    updateMetaTag('og:site_name', 'Hasan International', true);
+    updateMetaTag('og:locale', 'en_US', true);
+    
+    // Update Twitter meta tags
+    updateMetaTag('twitter:card', 'summary_large_image', true);
+    updateMetaTag('twitter:url', url, true);
+    updateMetaTag('twitter:title', fullTitle, true);
+    updateMetaTag('twitter:description', description, true);
+    updateMetaTag('twitter:image', image, true);
+    updateMetaTag('twitter:image:alt', 'Hasan International Logo', true);
+    
+    // Update canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', url);
+    
+    // Add schema data if provided
+    if (schemaData) {
+      let schemaScript = document.querySelector('script[type="application/ld+json"][data-react-seo]');
+      if (!schemaScript) {
+        schemaScript = document.createElement('script');
+        schemaScript.setAttribute('type', 'application/ld+json');
+        schemaScript.setAttribute('data-react-seo', 'true');
+        document.head.appendChild(schemaScript);
+      }
+      schemaScript.textContent = JSON.stringify(schemaData);
+    }
+  }, [fullTitle, description, keywords, image, url, type, schemaData]);
+  
+  return null; // This component doesn't render anything
 };
 
 export default SEO;
